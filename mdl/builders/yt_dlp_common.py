@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
-from mdl.options import RunOptions
+from mdl.core.options import RunOptions
 
 
 def base_yt_dlp_args(opts: RunOptions) -> List[str]:

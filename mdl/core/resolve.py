@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from mdl.config import Defaults
-from mdl.config_store import load_config
-from mdl.options import Options, RunOptions
+from mdl.core.config import Defaults
+from mdl.core.config_store import load_config
+from mdl.core.options import Options, RunOptions
 
 
 def resolve_run_options(opts: Options) -> RunOptions:

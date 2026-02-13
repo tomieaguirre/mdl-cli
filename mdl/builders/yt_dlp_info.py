@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import List
 
-from mdl.options import RunOptions
-from mdl.builders.common import base_yt_dlp_args
+from mdl.builders.yt_dlp_common import base_yt_dlp_args
+from mdl.core.options import RunOptions
 
 
 def build_info_command(url: str, opts: RunOptions) -> List[str]:

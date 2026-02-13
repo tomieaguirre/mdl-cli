@@ -2,15 +2,16 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
-from mdl.options import AppConfig
+from mdl.core.options import AppConfig
 
 # overrideable for tests via env var
 _DEFAULT_CONFIG_DIR = Path("~/.config/mdl").expanduser()
 _ENV_CONFIG_DIR = "MDL_CONFIG_DIR"
 
+SETTINGS_COMMANDS = {"cover", "cookies", "preset", "audio-format", "video-format"}
 
 ALLOWED = {
     "cover": ["on", "off"],
@@ -22,11 +23,13 @@ ALLOWED = {
 
 
 def default_config() -> AppConfig:
+    # Default audio format: m4a (YouTube typically provides AAC in m4a or Opus in webm;
+    # "flac" outputs are transcodes, not true source FLAC).
     return AppConfig(
         preset="safe",
         cookies="none",
         cover=False,
-        audio_format="flac",
+        audio_format="opus",
         video_format="mp4",
     )
 
@@ -115,16 +118,17 @@ def set_config_value(cfg: AppConfig, setting: str, value: str) -> AppConfig:
         raise SystemExit(f"[mdl] ERROR: invalid value '{value}'. Allowed: {allowed}")
 
     if setting == "cover":
-        return AppConfig(cfg.preset, cfg.cookies, value_n == "on", cfg.audio_format, cfg.video_format)
+        return replace(cfg, cover=(value_n == "on"))
     if setting == "cookies":
-        return AppConfig(cfg.preset, value_n, cfg.cover, cfg.audio_format, cfg.video_format)
+        return replace(cfg, cookies=value_n)
     if setting == "preset":
-        return AppConfig(value_n, cfg.cookies, cfg.cover, cfg.audio_format, cfg.video_format)
+        return replace(cfg, preset=value_n)
     if setting == "audio-format":
-        return AppConfig(cfg.preset, cfg.cookies, cfg.cover, value_n, cfg.video_format)
+        return replace(cfg, audio_format=value_n)
     if setting == "video-format":
-        return AppConfig(cfg.preset, cfg.cookies, cfg.cover, cfg.audio_format, value_n)
+        return replace(cfg, video_format=value_n)
 
+    # unreachable
     raise SystemExit(f"[mdl] ERROR: unknown setting '{setting}'.")
 
 

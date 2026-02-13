@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import List
 
-from mdl.config import Defaults
-from mdl.options import RunOptions
-from mdl.playlist import is_playlist_url
-from mdl.builders.common import base_yt_dlp_args
+from mdl.builders.yt_dlp_common import base_yt_dlp_args
+from mdl.core.config import Defaults
+from mdl.core.options import RunOptions
+from mdl.core.playlist import is_playlist_url
 
 
 def build_video_command(url: str, opts: RunOptions) -> List[str]:

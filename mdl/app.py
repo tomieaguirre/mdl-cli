@@ -1,116 +1,47 @@
 from __future__ import annotations
 
 import argparse
+from typing import Callable, Dict
 
-from mdl.options import Options
-from mdl.resolve import resolve_run_options
-
-from mdl.builders.audio import build_audio_command
-from mdl.builders.video import build_video_command
-from mdl.builders.info import build_info_command
-from mdl.runner import run_command, print_command
-
-from mdl.config_store import (
-    load_config,
-    save_config,
-    describe_config_value,
-    set_config_value,
-    list_allowed_values,
-)
+from mdl.commands.audio import handle_audio
+from mdl.commands.video import handle_video
+from mdl.commands.info import handle_info
+from mdl.commands.smoke import handle_smoke
+from mdl.commands.settings import SETTINGS_COMMANDS, handle_settings
+from mdl.core.options import Options
+from mdl.core.resolve import resolve_run_options
 
 
-_SETTINGS = {"cover", "cookies", "preset", "audio-format", "video-format"}
-
-
-def _handle_setting(cmd: str, value: str | None, list_flag: bool) -> int:
-    """
-    Settings UX:
-    - `mdl <cmd>`: show current value
-    - `mdl <cmd> <value>`: set value, persist, print confirmation
-    - `mdl <cmd> --list`: list allowed values
-    """
-    if list_flag:
-        values = list_allowed_values(cmd)
-        print(f"[mdl] {cmd} allowed: {', '.join(values)}")
-        return 0
-
-    cfg = load_config()
-
-    if value is None:
-        current = describe_config_value(cfg, cmd)
-        print(f"[mdl] {cmd}: {current}")
-        return 0
-
-    cfg2 = set_config_value(cfg, cmd, value)
-    save_config(cfg2)
-    current = describe_config_value(cfg2, cmd)
-    print(f"[mdl] {cmd}: {current}")
-    return 0
-
-
-def _require_url(opts: Options) -> str:
-    if not opts.url:
-        raise SystemExit("[mdl] ERROR: URL is required for this command.")
-    return opts.url
+# Handlers that require RunOptions
+_RUN_HANDLERS: Dict[str, Callable] = {
+    "info": handle_info,
+    "smoke": handle_smoke,
+    "audio": handle_audio,
+    "video": handle_video,
+}
 
 
 def run_app(args: argparse.Namespace) -> int:
+    """
+    Application entrypoint (routing/orchestration).
+
+    Responsibilities:
+    - Convert argparse Namespace -> Options DTO
+    - Handle settings commands (no yt-dlp execution)
+    - Resolve RunOptions (config + defaults)
+    - Dispatch to the correct command handler
+    """
     opts = Options.from_namespace(args)
 
-    # ─────────────────────────────────────────────────────────────
-    # Settings commands (no yt-dlp execution)
-    # ─────────────────────────────────────────────────────────────
-    if opts.command in _SETTINGS:
-        if opts.print_cmd:
-            print("[mdl] NOTE: --print is ignored for settings commands.")
-        return _handle_setting(opts.command, opts.value, opts.list_values)
+    # Settings commands: no runtime resolution needed
+    if opts.command in SETTINGS_COMMANDS:
+        return handle_settings(opts)
 
-    # Resolve runtime options (config + defaults)
+    # Resolve runtime options (config + defaults) for commands that invoke yt-dlp
     run_opts = resolve_run_options(opts)
 
-    # ─────────────────────────────────────────────────────────────
-    # info (no download)
-    # ─────────────────────────────────────────────────────────────
-    if opts.command == "info":
-        url = _require_url(opts)
-        cmd = build_info_command(url, run_opts)
-        if opts.print_cmd:
-            print_command(cmd)
-            return 0
-        return run_command(cmd)
+    handler = _RUN_HANDLERS.get(opts.command)
+    if handler is None:
+        raise SystemExit(f"[mdl] ERROR: Unknown command '{opts.command}'.")
 
-    # ─────────────────────────────────────────────────────────────
-    # smoke (stable test downloads)
-    # ─────────────────────────────────────────────────────────────
-    if opts.command == "smoke":
-        if opts.smoke_kind == "audio":
-            url = "ytsearch1:creative commons music test"
-            cmd = build_audio_command(url, run_opts)
-        elif opts.smoke_kind == "video":
-            url = "ytsearch1:test video"
-            cmd = build_video_command(url, run_opts)
-        else:
-            raise SystemExit("[mdl] ERROR: Unknown smoke kind (expected: audio|video).")
-
-        if opts.print_cmd:
-            print_command(cmd)
-            return 0
-        return run_command(cmd, needs_ffmpeg=run_opts.cover)
-
-    # ─────────────────────────────────────────────────────────────
-    # Downloads
-    # ─────────────────────────────────────────────────────────────
-    if opts.command == "audio":
-        url = _require_url(opts)
-        cmd = build_audio_command(url, run_opts)
-    elif opts.command == "video":
-        url = _require_url(opts)
-        cmd = build_video_command(url, run_opts)
-    else:
-        raise SystemExit("[mdl] ERROR: Unknown command.")
-
-    if opts.print_cmd:
-        print_command(cmd)
-        return 0
-
-    return run_command(cmd, needs_ffmpeg=run_opts.cover)
+    return handler(opts, run_opts)
