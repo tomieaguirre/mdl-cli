@@ -104,9 +104,12 @@ def build_parser() -> argparse.ArgumentParser:
     # Smoke
     p_smoke = subparsers.add_parser("smoke", help="Download a small sample to verify setup.")
     smoke_sub = p_smoke.add_subparsers(dest="smoke_kind", required=True)
-    smoke_sub.add_parser("audio", help="Smoke test: audio download.")
-    smoke_sub.add_parser("video", help="Smoke test: video download.")
-    _add_print_flag(p_smoke)
+
+    p_smoke_audio = smoke_sub.add_parser("audio", help="Smoke test: audio download.")
+    _add_print_flag(p_smoke_audio)
+
+    p_smoke_video = smoke_sub.add_parser("video", help="Smoke test: video download.")
+    _add_print_flag(p_smoke_video)
 
     # Persistent settings (show on no arg, set on value, list on --list)
     p_cover = subparsers.add_parser("cover", help="Configure cover behavior (thumbnail).")
