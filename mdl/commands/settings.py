@@ -24,7 +24,7 @@ def _handle_setting(cmd: str, value: str | None, list_flag: bool) -> int:
     if cmd not in SETTINGS_COMMANDS:
         raise SystemExit(f"[mdl] ERROR: unknown settings command '{cmd}'.")
 
-    if list_flag:
+    if list_flag and cmd != "out":
         values = list_allowed_values(cmd)
         print(f"[mdl] {cmd} allowed: {', '.join(values)}")
         return 0
@@ -35,6 +35,9 @@ def _handle_setting(cmd: str, value: str | None, list_flag: bool) -> int:
         current = describe_config_value(cfg, cmd)
         print(f"[mdl] {cmd}: {current}")
         return 0
+
+    if cmd == "out" and not str(value).strip():
+        raise SystemExit("[mdl] ERROR: out requires a PATH")
 
     cfg2 = set_config_value(cfg, cmd, value)
     save_config(cfg2)

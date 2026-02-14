@@ -17,9 +17,12 @@ def resolve_run_options(opts: Options) -> RunOptions:
     """
     cfg = load_config()
 
-    # out_dir is only meaningful for downloads; info/settings may not provide it.
-    out_dir = (opts.out or Defaults.out_dir)
-    out_dir = Path(out_dir).expanduser()
+    out_raw = str(getattr(cfg, "out_dir", "")).strip()
+    base_out = Path(out_raw if out_raw else Defaults.out_dir).expanduser()
+    try:
+        out_dir = base_out.resolve()
+    except Exception:
+        out_dir = Path(Defaults.out_dir).expanduser().resolve()
 
     preset = str(cfg.preset).strip().lower()
 

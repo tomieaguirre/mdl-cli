@@ -20,6 +20,9 @@ _RUN_HANDLERS: Dict[str, Callable] = {
     "video": handle_video,
 }
 
+# Settings commands are handled without runtime resolution.
+_SETTINGS = set(SETTINGS_COMMANDS)
+
 
 def run_app(args: argparse.Namespace) -> int:
     """
@@ -34,7 +37,7 @@ def run_app(args: argparse.Namespace) -> int:
     opts = Options.from_namespace(args)
 
     # Settings commands: no runtime resolution needed
-    if opts.command in SETTINGS_COMMANDS:
+    if opts.command in _SETTINGS:
         return handle_settings(opts)
 
     # Resolve runtime options (config + defaults) for commands that invoke yt-dlp

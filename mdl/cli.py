@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import argparse
 import sys
-from pathlib import Path
 from typing import Optional, List
 
 from mdl import __version__
-from mdl.core.config import Defaults
 from mdl.app import run_app
 
 
@@ -17,14 +15,6 @@ def _add_download_flags(p: argparse.ArgumentParser) -> None:
     Presets handle that internally.
     """
     p.add_argument("url", metavar="URL", help="Target URL (single item or playlist).")
-
-    p.add_argument(
-        "--out",
-        metavar="DIR",
-        type=Path,
-        default=Defaults.out_dir,
-        help=f"Output base directory (default: {Defaults.out_dir}).",
-    )
 
 
 def _add_setting_value_arg(p: argparse.ArgumentParser, *, name: str, metavar: str = "VALUE") -> None:
@@ -65,9 +55,12 @@ def build_parser() -> argparse.ArgumentParser:
             "  mdl info URL --print\n"
             "  mdl smoke audio\n"
             "  mdl smoke video\n"
-            "  mdl audio URL --out ~/Music/mdl\n"
+            "  mdl out\n"
+            "  mdl out ~/Music/mdl\n"
             "\n"
             "Settings:\n"
+            "  mdl out\n"
+            "  mdl out ~/Music/mdl\n"
             "  mdl preset\n"
             "  mdl preset fast\n"
             "  mdl preset --list\n"
@@ -131,6 +124,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_video_fmt = subparsers.add_parser("video-format", help="Configure default video container (remux).")
     p_video_fmt.add_argument("--list", action="store_true", help="List allowed values.")
     _add_setting_value_arg(p_video_fmt, name="value", metavar="mp4|mkv")
+
+    p_out = subparsers.add_parser("out", help="Configure default output base directory.")
+    _add_setting_value_arg(p_out, name="value", metavar="PATH")
 
     return parser
 

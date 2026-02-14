@@ -7,9 +7,9 @@ from mdl.core.options import Options, RunOptions
 from mdl.infra.runner import print_command, run_command
 
 
-# Deterministic smoke target.
-# Used for both audio and video smoke tests to verify full download pipeline.
-SMOKE_URL = "https://www.youtube.com/watch?v=dWRCooFKk3c"
+# Deterministic smoke targets used to verify the full download pipeline.
+SMOKE_AUDIO_URL = "https://www.youtube.com/watch?v=dWRCooFKk3c"
+SMOKE_VIDEO_URL = "https://www.youtube.com/watch?v=jNQXAC9IVRw"
 
 def require_url(opts: Options) -> str:
     if not opts.url:
@@ -47,9 +47,9 @@ def run_info(opts: Options, run_opts: RunOptions) -> int:
 
 def run_smoke(opts: Options, run_opts: RunOptions) -> int:
     if opts.smoke_kind == "audio":
-        cmd = build_audio_command(SMOKE_URL, run_opts)
+        cmd = build_audio_command(SMOKE_AUDIO_URL, run_opts)
     elif opts.smoke_kind == "video":
-        cmd = build_video_command(SMOKE_URL, run_opts)
+        cmd = build_video_command(SMOKE_VIDEO_URL, run_opts)
     else:
         raise SystemExit("[mdl] ERROR: Unknown smoke kind (expected: audio|video).")
 

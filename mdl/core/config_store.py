@@ -5,13 +5,14 @@ import os
 from dataclasses import asdict, replace
 from pathlib import Path
 
+from mdl.core.config import Defaults
 from mdl.core.options import AppConfig
 
 # overrideable for tests via env var
 _DEFAULT_CONFIG_DIR = Path("~/.config/mdl").expanduser()
 _ENV_CONFIG_DIR = "MDL_CONFIG_DIR"
 
-SETTINGS_COMMANDS = {"cover", "cookies", "preset", "audio-format", "video-format"}
+SETTINGS_COMMANDS = {"cover", "cookies", "preset", "audio-format", "video-format", "out"}
 
 ALLOWED = {
     "cover": ["on", "off"],
@@ -29,8 +30,9 @@ def default_config() -> AppConfig:
         preset="safe",
         cookies="none",
         cover=False,
-        audio_format="opus",
+        audio_format="m4a",
         video_format="mp4",
+        out_dir=str(Path(Defaults.out_dir).expanduser()),
     )
 
 
@@ -62,6 +64,7 @@ def load_config() -> AppConfig:
     cover = bool(data.get("cover", cfg.cover))
     audio_format = _norm_str(data.get("audio_format", cfg.audio_format))
     video_format = _norm_str(data.get("video_format", cfg.video_format))
+    out_dir = _normalize_out_dir(data.get("out_dir", cfg.out_dir), cfg.out_dir)
 
     preset = preset if preset in ALLOWED["preset"] else cfg.preset
     cookies = cookies if cookies in ALLOWED["cookies"] else cfg.cookies
@@ -74,6 +77,7 @@ def load_config() -> AppConfig:
         cover=cover,
         audio_format=audio_format,
         video_format=video_format,
+        out_dir=out_dir,
     )
 
 
@@ -103,11 +107,23 @@ def describe_config_value(cfg: AppConfig, setting: str) -> str:
         return cfg.audio_format
     if setting == "video-format":
         return cfg.video_format
+    if setting == "out":
+        return cfg.out_dir
     raise SystemExit(f"[mdl] ERROR: unknown setting '{setting}'.")
 
 
 def set_config_value(cfg: AppConfig, setting: str, value: str) -> AppConfig:
     setting = _norm_str(setting)
+
+    if setting == "out":
+        value_s = str(value).strip()
+        if not value_s:
+            raise SystemExit("[mdl] ERROR: out requires a PATH")
+        out_dir = _normalize_out_dir(value_s, "")
+        if not out_dir:
+            raise SystemExit("[mdl] ERROR: out requires a PATH")
+        return replace(cfg, out_dir=out_dir)
+
     value_n = _norm_str(value)
 
     if setting not in ALLOWED:
@@ -134,3 +150,16 @@ def set_config_value(cfg: AppConfig, setting: str, value: str) -> AppConfig:
 
 def _norm_str(x: object) -> str:
     return str(x).strip().lower()
+
+
+def _normalize_out_dir(raw: object, fallback: str) -> str:
+    try:
+        value = str(raw).strip()
+    except Exception:
+        return fallback
+    if not value:
+        return fallback
+    try:
+        return str(Path(value).expanduser().resolve())
+    except Exception:
+        return fallback

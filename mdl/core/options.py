@@ -16,7 +16,6 @@ class Options:
 
     # Download/info
     url: Optional[str]
-    out: Optional[Path]
 
     # Smoke
     smoke_kind: Optional[str]  # "audio" | "video"
@@ -34,7 +33,6 @@ class Options:
             print_cmd=bool(getattr(ns, "print", False)),
 
             url=(str(ns.url) if hasattr(ns, "url") else None),
-            out=(Path(ns.out) if hasattr(ns, "out") else None),
 
             smoke_kind=(str(ns.smoke_kind) if hasattr(ns, "smoke_kind") else None),
 
@@ -54,6 +52,7 @@ class AppConfig:
     cover: bool               # cover behavior enabled
     audio_format: str         # "flac" | "mp3" | "opus" | "m4a"
     video_format: str         # "mp4" | "mkv"
+    out_dir: str              # absolute base output path as string
 
 
 @dataclass(frozen=True)
