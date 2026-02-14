@@ -1,6 +1,6 @@
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-<!-- ![CI](https://github.com/tomieaguirre/mdl-cli/actions/workflows/ci.yml/badge.svg) -->
+![CI](https://github.com/tomieaguirre/mdl-cli/actions/workflows/ci.yml/badge.svg)
 
 # mdl-cli
 
