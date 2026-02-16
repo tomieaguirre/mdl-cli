@@ -38,6 +38,7 @@ mdl smoke video [--print]
 Output base directory is configured persistently with `mdl out`:
 
 ```bash
+mdl config
 mdl out
 mdl out ~/Music/mdl
 ```
@@ -52,6 +53,7 @@ video: https://www.youtube.com/watch?v=jNQXAC9IVRw
 ### Settings Commands
 
 ```bash
+mdl config
 mdl cover [on|off] [--list]
 mdl cookies [BROWSER|none] [--list]
 mdl preset [safe|fast] [--list]
@@ -62,9 +64,10 @@ mdl out [PATH]
 
 Behavior:
 
-- No value: show current value.
-- Value provided: validate, persist, and print updated value.
-- `--list`: show allowed values.
+- `config`: show the effective persistent config as JSON.
+- No value (`cover`, `cookies`, `preset`, `audio-format`, `video-format`, `out`): show current value.
+- Value provided (`cover`, `cookies`, `preset`, `audio-format`, `video-format`, `out`): validate, persist, and print updated value.
+- `--list` (`cover`, `cookies`, `preset`, `audio-format`, `video-format`): show allowed values.
 - `out` accepts any path and does not support `--list`.
 
 `--print` is ignored for settings commands.
@@ -226,6 +229,7 @@ Also verify whether URL matched playlist mode (`list=`), which changes path temp
 Inspect current settings and config path:
 
 ```bash
+mdl config
 mdl preset
 mdl cookies
 mdl cover

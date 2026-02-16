@@ -12,7 +12,7 @@ from mdl.core.options import AppConfig
 _DEFAULT_CONFIG_DIR = Path("~/.config/mdl").expanduser()
 _ENV_CONFIG_DIR = "MDL_CONFIG_DIR"
 
-SETTINGS_COMMANDS = {"cover", "cookies", "preset", "audio-format", "video-format", "out"}
+SETTINGS_COMMANDS = {"config", "cover", "cookies", "preset", "audio-format", "video-format", "out"}
 
 ALLOWED = {
     "cover": ["on", "off"],

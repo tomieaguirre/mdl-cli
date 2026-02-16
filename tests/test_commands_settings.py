@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pathlib import Path
+import json
 
 import pytest
 
@@ -26,6 +26,32 @@ def test_handle_setting_prints_current_value_when_value_not_provided(monkeypatch
 
     assert rc == 0
     assert "[mdl] preset: fast" in captured.out
+
+
+def test_handle_setting_config_prints_effective_config_as_json(monkeypatch, capsys, make_app_config) -> None:
+    cfg = make_app_config(
+        preset="fast",
+        cookies="chrome",
+        cover=True,
+        audio_format="opus",
+        video_format="mkv",
+        out_dir="/tmp/out",
+    )
+    monkeypatch.setattr(settings, "load_config", lambda: cfg)
+
+    rc = settings._handle_setting("config", value=None, list_flag=False)
+    captured = capsys.readouterr()
+
+    assert rc == 0
+    parsed = json.loads(captured.out)
+    assert parsed == {
+        "preset": "fast",
+        "cookies": "chrome",
+        "cover": True,
+        "audio_format": "opus",
+        "video_format": "mkv",
+        "out_dir": "/tmp/out",
+    }
 
 
 def test_handle_setting_updates_and_saves_value(monkeypatch, capsys, make_app_config) -> None:

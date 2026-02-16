@@ -102,6 +102,7 @@ pipx inject yt-dlp mutagen
 
 ```bash
 mdl --help
+mdl config
 mdl out
 mdl out ~/Music/mdl
 mdl audio "URL" --print
@@ -121,6 +122,7 @@ mdl audio "https://music.youtube.com/watch?v=ID&si=SOMETHING"
 Show current value:
 
 ```bash
+mdl config
 mdl preset
 mdl cookies
 mdl cover
@@ -128,6 +130,8 @@ mdl audio-format
 mdl video-format
 mdl out
 ```
+
+`mdl config` prints the persistent config as JSON (same shape as `~/.config/mdl/config.json`).
 
 Set a new value:
 

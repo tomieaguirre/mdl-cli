@@ -55,10 +55,12 @@ def build_parser() -> argparse.ArgumentParser:
             "  mdl info URL --print\n"
             "  mdl smoke audio\n"
             "  mdl smoke video\n"
+            "  mdl config\n"
             "  mdl out\n"
             "  mdl out ~/Music/mdl\n"
             "\n"
             "Settings:\n"
+            "  mdl config\n"
             "  mdl out\n"
             "  mdl out ~/Music/mdl\n"
             "  mdl preset\n"
@@ -127,6 +129,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_out = subparsers.add_parser("out", help="Configure default output base directory.")
     _add_setting_value_arg(p_out, name="value", metavar="PATH")
+
+    subparsers.add_parser("config", help="Show the persistent config values.")
 
     return parser
 

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import sys
+from dataclasses import asdict
 
 from mdl.core.config_store import (
     describe_config_value,
@@ -13,16 +15,21 @@ from mdl.core.config_store import (
 from mdl.core.options import Options
 
 
-
 def _handle_setting(cmd: str, value: str | None, list_flag: bool) -> int:
     """
     Settings UX:
+    - `mdl config`: show effective persistent config as JSON
     - `mdl <cmd>`: show current value
     - `mdl <cmd> <value>`: set value, persist, print confirmation
     - `mdl <cmd> --list`: list allowed values
     """
     if cmd not in SETTINGS_COMMANDS:
         raise SystemExit(f"[mdl] ERROR: unknown settings command '{cmd}'.")
+
+    if cmd == "config":
+        cfg = load_config()
+        print(json.dumps(asdict(cfg), indent=2, sort_keys=True))
+        return 0
 
     if list_flag and cmd != "out":
         values = list_allowed_values(cmd)

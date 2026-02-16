@@ -102,6 +102,10 @@ def test_list_allowed_values_for_known_setting() -> None:
     assert values == ["flac", "mp3", "opus", "m4a"]
 
 
+def test_settings_commands_includes_config_command() -> None:
+    assert "config" in config_store.SETTINGS_COMMANDS
+
+
 def test_list_allowed_values_raises_for_unknown_setting() -> None:
     with pytest.raises(SystemExit, match="unknown setting"):
         config_store.list_allowed_values("unknown-setting")
