@@ -27,13 +27,13 @@ If you run `mdl` with no arguments, it prints help and exits with code `0`.
 ```bash
 mdl audio URL [--print]
 mdl video URL [--print]
-mdl info URL [--print]
+mdl info URL
 mdl smoke audio [--print]
 mdl smoke video [--print]
 ```
 
 - `URL`: target media URL (single item or playlist).
-- `--print`: print final `yt-dlp` command and exit without execution.
+- `--print` (`audio`, `video`, `smoke`): print final `yt-dlp` command and exit without execution.
 
 Output base directory is configured persistently with `mdl out`:
 
@@ -130,7 +130,7 @@ Execution behavior:
 - Exit code is propagated from the `yt-dlp` subprocess.
 - `Ctrl+C` returns exit code `130`.
 
-`--print` behavior:
+`--print` behavior (`audio`, `video`, `smoke` only):
 
 - Prints the fully quoted final command.
 - Does not run subprocesses.

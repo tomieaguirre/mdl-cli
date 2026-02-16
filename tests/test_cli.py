@@ -35,6 +35,22 @@ def test_build_parser_parses_setting_command_with_value_and_list_flag() -> None:
     assert getattr(ns, "list") is True
 
 
+def test_build_parser_parses_info_command_without_print_flag() -> None:
+    parser = cli.build_parser()
+
+    ns = parser.parse_args(["info", "https://example.com"])
+
+    assert ns.command == "info"
+    assert ns.url == "https://example.com"
+
+
+def test_build_parser_rejects_print_flag_for_info() -> None:
+    parser = cli.build_parser()
+
+    with pytest.raises(SystemExit):
+        parser.parse_args(["info", "https://example.com", "--print"])
+
+
 def test_build_parser_parses_config_command() -> None:
     parser = cli.build_parser()
 

@@ -52,7 +52,7 @@ def build_parser() -> argparse.ArgumentParser:
             "Examples:\n"
             "  mdl audio URL --print\n"
             "  mdl video URL --print\n"
-            "  mdl info URL --print\n"
+            "  mdl info URL\n"
             "  mdl smoke audio\n"
             "  mdl smoke video\n"
             "  mdl config\n"
@@ -94,7 +94,6 @@ def build_parser() -> argparse.ArgumentParser:
     # Info
     p_info = subparsers.add_parser("info", help="Show available formats for a URL (yt-dlp -F).")
     p_info.add_argument("url", metavar="URL", help="Target URL to inspect (no download).")
-    _add_print_flag(p_info)
 
     # Smoke
     p_smoke = subparsers.add_parser("smoke", help="Download a small sample to verify setup.")
