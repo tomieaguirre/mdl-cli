@@ -34,7 +34,11 @@ class Options:
 
             url=(str(ns.url) if hasattr(ns, "url") else None),
 
-            smoke_kind=(str(ns.smoke_kind) if hasattr(ns, "smoke_kind") else None),
+            smoke_kind=(
+                str(ns.smoke_kind)
+                if hasattr(ns, "smoke_kind") and ns.smoke_kind is not None
+                else None
+            ),
 
             list_values=bool(getattr(ns, "list", False)),
             value=(str(ns.value) if hasattr(ns, "value") and ns.value is not None else None),
