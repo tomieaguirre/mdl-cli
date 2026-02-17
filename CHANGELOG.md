@@ -6,12 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - New `mdl config` command to print the effective persistent configuration as JSON.
+- Added `--mode {auto,album,flat}` to `audio` command to control playlist layout behavior.
+- Playlist downloads now automatically strip a leading `Album - ` prefix from `playlist_title`.
 
 ### Changed
-- `mdl info` no longer accepts `--print`; it always executes `yt-dlp -F` directly.
-- Audio output templates now prefer the first artist (`artists.0`) so playlist/album tracks with collaborators stay in one primary artist folder.
-- Playlist downloads now strip a leading `Album - ` prefix from `playlist_title` when generating folder names.
-- Added `--mode {auto,album,flat}` to `audio` and changed default playlist layout to `auto` (`OLAK...` => album, otherwise flat single-folder playlist).
+- `mdl info` no longer accepts `--print`; it now always executes `yt-dlp -F`.
+- Audio playlist layout now prefers the primary artist (`artists.0`) to prevent album fragmentation when tracks contain collaborators.
+- Default playlist layout mode for audio is now `auto` (`OLAK...` playlists → album layout, others → flat layout).
 - Video playlists now always use flat single-folder layout.
 
 ## [0.1.1] - 2026-02-16
