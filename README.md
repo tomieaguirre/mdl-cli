@@ -107,6 +107,7 @@ mdl out
 mdl out ~/Music/mdl
 mdl audio "URL" --print
 mdl audio "URL"
+mdl audio "PLAYLIST_URL" --mode flat
 mdl video "URL"
 mdl info "URL"
 ```

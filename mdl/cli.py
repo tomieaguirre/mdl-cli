@@ -39,6 +39,22 @@ def _add_print_flag(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_playlist_mode_flag(p: argparse.ArgumentParser) -> None:
+    """
+    Audio playlist folder layout strategy:
+    - auto: detect album-like playlists (OLAK...) and use album layout.
+    - album: force artist/channel + playlist folder layout.
+    - flat: force single playlist folder for all entries.
+    """
+    p.add_argument(
+        "--mode",
+        dest="playlist_mode",
+        choices=("auto", "album", "flat"),
+        default="auto",
+        help="Playlist folder layout strategy (default: auto).",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     """
     CLI definition only. All business logic lives in mdl.app / core / commands.
@@ -52,6 +68,7 @@ def build_parser() -> argparse.ArgumentParser:
             "Examples:\n"
             "  mdl audio URL --print\n"
             "  mdl video URL --print\n"
+            "  mdl audio URL --mode flat\n"
             "  mdl info URL\n"
             "  mdl smoke audio\n"
             "  mdl smoke video\n"
@@ -70,6 +87,9 @@ def build_parser() -> argparse.ArgumentParser:
             "  mdl cover on\n"
             "  mdl audio-format opus\n"
             "  mdl video-format mkv\n"
+            "\n"
+            "Tip:\n"
+            "  During audio/video/smoke downloads, press Ctrl+C to cancel.\n"
         ),
     )
 
@@ -85,6 +105,7 @@ def build_parser() -> argparse.ArgumentParser:
     # Downloads
     p_audio = subparsers.add_parser("audio", help="Download best-quality audio.")
     _add_download_flags(p_audio)
+    _add_playlist_mode_flag(p_audio)
     _add_print_flag(p_audio)
 
     p_video = subparsers.add_parser("video", help="Download best-quality video.")

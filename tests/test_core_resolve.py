@@ -92,3 +92,21 @@ def test_resolve_raises_when_safe_sleep_min_is_greater_than_max(monkeypatch, mak
 
     with pytest.raises(SystemExit, match="sleep-min must be <= sleep-max"):
         resolve.resolve_run_options(make_options())
+
+
+def test_resolve_keeps_valid_playlist_mode_from_cli(monkeypatch, make_options, make_app_config) -> None:
+    cfg = make_app_config()
+    monkeypatch.setattr(resolve, "load_config", lambda: cfg)
+
+    run = resolve.resolve_run_options(make_options(playlist_mode="flat"))
+
+    assert run.playlist_mode == "flat"
+
+
+def test_resolve_falls_back_to_auto_on_invalid_playlist_mode(monkeypatch, make_options, make_app_config) -> None:
+    cfg = make_app_config()
+    monkeypatch.setattr(resolve, "load_config", lambda: cfg)
+
+    run = resolve.resolve_run_options(make_options(playlist_mode="weird"))
+
+    assert run.playlist_mode == "auto"

@@ -53,6 +53,10 @@ def resolve_run_options(opts: Options) -> RunOptions:
         if sleep_min > sleep_max:
             raise SystemExit("[mdl] ERROR: internal sleep-min must be <= sleep-max.")
 
+    playlist_mode = str(getattr(opts, "playlist_mode", "auto")).strip().lower()
+    if playlist_mode not in {"auto", "album", "flat"}:
+        playlist_mode = "auto"
+
     return RunOptions(
         out_dir=out_dir,
         preset=preset,
@@ -63,4 +67,5 @@ def resolve_run_options(opts: Options) -> RunOptions:
         limit_rate=limit_rate,
         sleep_min=sleep_min,
         sleep_max=sleep_max,
+        playlist_mode=playlist_mode,
     )

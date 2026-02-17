@@ -70,14 +70,35 @@ def test_audio_playlist_uses_playlist_template_and_no_cover_flags(make_run_optio
     assert "--ignore-errors" in cmd
     assert "--continue" in cmd
     assert "--no-overwrites" in cmd
+    assert "--replace-in-metadata" in cmd
+    _assert_contains_kv(cmd, "--replace-in-metadata", "playlist_title")
 
     assert "--write-thumbnail" not in cmd
     assert "--embed-thumbnail" not in cmd
 
-    # Template playlist
-    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.audio_playlist_tpl))
+    # Template playlist (default auto => flat for regular playlists)
+    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.audio_playlist_flat_tpl))
 
     assert cmd[-1] == url
+
+
+def test_audio_playlist_auto_detects_album_layout_for_olak_lists(make_run_options) -> None:
+    url = "https://music.youtube.com/playlist?list=OLAK5uy_test"
+    opts = make_run_options()
+
+    cmd = build_audio_command(url, opts)
+
+    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.audio_playlist_tpl))
+
+
+def test_audio_playlist_mode_override_can_force_flat_or_album_layout(make_run_options) -> None:
+    url = "https://example.com/watch?v=abc123&list=PLxyz"
+
+    cmd_album = build_audio_command(url, make_run_options(playlist_mode="album"))
+    _assert_contains_kv(cmd_album, "-o", str(Path("/tmp/mdl") / Defaults.audio_playlist_tpl))
+
+    cmd_flat = build_audio_command(url, make_run_options(playlist_mode="flat"))
+    _assert_contains_kv(cmd_flat, "-o", str(Path("/tmp/mdl") / Defaults.audio_playlist_flat_tpl))
 
 
 def test_video_single_cover_flags_present_only_when_cover_true(make_run_options) -> None:
@@ -107,12 +128,23 @@ def test_video_playlist_cover_flags_absent_when_cover_false(make_run_options) ->
     assert cmd[0] == "yt-dlp"
     _assert_contains_kv(cmd, "-f", "bv*+ba/b")
     _assert_contains_kv(cmd, "--remux-video", "mp4")
+    assert "--replace-in-metadata" in cmd
+    _assert_contains_kv(cmd, "--replace-in-metadata", "playlist_title")
 
     assert "--write-thumbnail" not in cmd
     assert "--embed-thumbnail" not in cmd
 
-    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.video_playlist_tpl))
+    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.video_playlist_flat_tpl))
     assert cmd[-1] == url
+
+
+def test_video_playlist_is_always_flat_even_for_olak_and_album_mode(make_run_options) -> None:
+    url = "https://music.youtube.com/playlist?list=OLAK5uy_test"
+    opts = make_run_options(playlist_mode="album")
+
+    cmd = build_video_command(url, opts)
+
+    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.video_playlist_flat_tpl))
 
 
 def test_info_command_minimal(make_run_options) -> None:

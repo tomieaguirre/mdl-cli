@@ -16,6 +16,7 @@ class Options:
 
     # Download/info
     url: Optional[str]
+    playlist_mode: str         # "auto" | "album" | "flat"
 
     # Smoke
     smoke_kind: Optional[str]  # "audio" | "video"
@@ -33,6 +34,7 @@ class Options:
             print_cmd=bool(getattr(ns, "print", False)),
 
             url=(str(ns.url) if hasattr(ns, "url") else None),
+            playlist_mode=str(getattr(ns, "playlist_mode", "auto")),
 
             smoke_kind=(
                 str(ns.smoke_kind)
@@ -81,3 +83,4 @@ class RunOptions:
     limit_rate: Optional[str]
     sleep_min: Optional[int]
     sleep_max: Optional[int]
+    playlist_mode: str = "auto"

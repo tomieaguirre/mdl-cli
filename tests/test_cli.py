@@ -12,7 +12,32 @@ def test_build_parser_parses_audio_command_with_print_flag() -> None:
 
     assert ns.command == "audio"
     assert ns.url == "https://example.com"
+    assert ns.playlist_mode == "auto"
     assert getattr(ns, "print") is True
+
+
+def test_build_parser_parses_audio_command_with_playlist_mode_override() -> None:
+    parser = cli.build_parser()
+
+    ns = parser.parse_args(["audio", "https://example.com", "--mode", "flat"])
+
+    assert ns.command == "audio"
+    assert ns.url == "https://example.com"
+    assert ns.playlist_mode == "flat"
+
+
+def test_build_parser_rejects_invalid_playlist_mode() -> None:
+    parser = cli.build_parser()
+
+    with pytest.raises(SystemExit):
+        parser.parse_args(["audio", "https://example.com", "--mode", "weird"])
+
+
+def test_build_parser_rejects_mode_flag_for_video() -> None:
+    parser = cli.build_parser()
+
+    with pytest.raises(SystemExit):
+        parser.parse_args(["video", "https://example.com", "--mode", "flat"])
 
 
 def test_build_parser_parses_smoke_subcommand() -> None:
