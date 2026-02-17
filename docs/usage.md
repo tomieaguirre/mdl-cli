@@ -25,7 +25,7 @@ If you run `mdl` with no arguments, it prints help and exits with code `0`.
 ### Download and Inspection Commands
 
 ```bash
-mdl audio URL [--print]
+mdl audio URL [--mode auto|album|flat] [--print]
 mdl video URL [--print]
 mdl info URL
 mdl smoke audio [--print]
@@ -34,6 +34,10 @@ mdl smoke video [--print]
 
 - `URL`: target media URL (single item or playlist).
 - `--print` (`audio`, `video`, `smoke`): print final `yt-dlp` command and exit without execution.
+- `--mode` (`audio` only):
+  - `auto` (default): detect album-like playlists (`list=OLAK...`) as album layout, otherwise flat layout.
+  - `album`: force `artist-or-channel/playlist/...`.
+  - `flat`: force `playlist/...` (single folder for all entries).
 
 Output base directory is configured persistently with `mdl out`:
 
@@ -144,12 +148,19 @@ Default robustness flags for downloads:
 
 Output templates:
 
-- Audio single: `%(artist|uploader)s/%(title)s.%(ext)s`
-- Audio playlist: `%(artist|uploader)s/%(playlist_title)s/%(playlist_index)02d - %(title)s.%(ext)s`
+- Audio single: `%(artists.0|artist|uploader)s/%(title)s.%(ext)s`
+- Audio playlist (album layout): `%(artists.0|artist|uploader)s/%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s`
+- Audio playlist (flat layout): `%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s`
 - Video single: `%(uploader|channel)s/%(title)s.%(ext)s`
-- Video playlist: `%(uploader|channel)s/%(playlist_title)s/%(playlist_index)02d - %(title)s.%(ext)s`
+- Video playlist: `%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s` (always flat)
 
-Playlist template selection uses a URL heuristic (`list=` in URL).
+For audio album layout, this prefers the first artist (`artists.0`) so collaborations stay under the primary artist folder.
+For playlist folders, `mdl` removes a leading `Album - ` prefix in `playlist_title` when present.
+
+In `auto` mode, playlist layout detection uses the playlist id:
+- `OLAK...` => album layout
+- everything else => flat layout
+For video playlists, `mdl` always uses flat layout.
 
 ## Thumbnail/Cover Behavior
 

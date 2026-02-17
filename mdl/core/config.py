@@ -43,7 +43,13 @@ class Defaults:
     sleep_max: int = 15
 
     # Output templates
-    audio_single_tpl: str = "%(artist|uploader)s/%(title)s.%(ext)s"
-    audio_playlist_tpl: str = "%(artist|uploader)s/%(playlist_title)s/%(playlist_index)02d - %(title)s.%(ext)s"
+    # Album layout: keep grouping by artist -> album/playlist title.
+    audio_single_tpl: str = "%(artists.0|artist|uploader)s/%(title)s.%(ext)s"
+    audio_playlist_tpl: str = "%(artists.0|artist|uploader)s/%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s"
+    video_playlist_tpl: str = "%(uploader|channel)s/%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s"
+
+    # Flat layout: keep all playlist entries under a single playlist folder.
+    audio_playlist_flat_tpl: str = "%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s"
+    video_playlist_flat_tpl: str = "%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s"
+
     video_single_tpl: str = "%(uploader|channel)s/%(title)s.%(ext)s"
-    video_playlist_tpl: str = "%(uploader|channel)s/%(playlist_title)s/%(playlist_index)02d - %(title)s.%(ext)s"

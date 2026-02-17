@@ -28,3 +28,13 @@ def test_xdg_music_dir_reads_user_dirs_file_and_expands_home(
     result = core_config._xdg_music_dir()
 
     assert result == tmp_path / "MyMusic"
+
+
+def test_defaults_audio_templates_use_primary_artist_first() -> None:
+    assert core_config.Defaults.audio_single_tpl.startswith("%(artists.0|artist|uploader)s/")
+    assert core_config.Defaults.audio_playlist_tpl.startswith("%(artists.0|artist|uploader)s/")
+
+
+def test_defaults_flat_playlist_templates_group_under_playlist_folder() -> None:
+    assert core_config.Defaults.audio_playlist_flat_tpl.startswith("%(playlist_title|playlist)s/")
+    assert core_config.Defaults.video_playlist_flat_tpl.startswith("%(playlist_title|playlist)s/")

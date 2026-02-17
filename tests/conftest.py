@@ -15,6 +15,7 @@ def make_options() -> Callable[..., Options]:
         command: str = "audio",
         print_cmd: bool = False,
         url: str | None = "https://example.com",
+        playlist_mode: str = "auto",
         smoke_kind: str | None = None,
         list_values: bool = False,
         value: str | None = None,
@@ -23,6 +24,7 @@ def make_options() -> Callable[..., Options]:
             command=command,
             print_cmd=print_cmd,
             url=url,
+            playlist_mode=playlist_mode,
             smoke_kind=smoke_kind,
             list_values=list_values,
             value=value,
@@ -44,6 +46,7 @@ def make_run_options() -> Callable[..., RunOptions]:
         limit_rate: str | None = None,
         sleep_min: int | None = None,
         sleep_max: int | None = None,
+        playlist_mode: str = "auto",
     ) -> RunOptions:
         return RunOptions(
             out_dir=Path(out_dir),
@@ -55,6 +58,7 @@ def make_run_options() -> Callable[..., RunOptions]:
             limit_rate=limit_rate,
             sleep_min=sleep_min,
             sleep_max=sleep_max,
+            playlist_mode=playlist_mode,
         )
 
     return _make
