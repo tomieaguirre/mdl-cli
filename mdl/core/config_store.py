@@ -5,11 +5,10 @@ import os
 from dataclasses import asdict, replace
 from pathlib import Path
 
-from mdl.core.config import Defaults
+from mdl.core.config import Defaults, default_config_dir
 from mdl.core.options import AppConfig
 
-# overrideable for tests via env var
-_DEFAULT_CONFIG_DIR = Path("~/.config/mdl").expanduser()
+# Overrideable for tests and advanced users.
 _ENV_CONFIG_DIR = "MDL_CONFIG_DIR"
 
 SETTINGS_COMMANDS = {"config", "cover", "cookies", "preset", "audio-format", "video-format", "out"}
@@ -32,15 +31,15 @@ def default_config() -> AppConfig:
         cover=False,
         audio_format="m4a",
         video_format="mp4",
-        out_dir=str(Path(Defaults.out_dir).expanduser()),
+        out_dir=_default_out_dir(),
     )
 
 
 def _config_dir() -> Path:
     raw = os.environ.get(_ENV_CONFIG_DIR)
     if raw:
-        return Path(raw).expanduser()
-    return _DEFAULT_CONFIG_DIR
+        return _expand_path(raw)
+    return default_config_dir("mdl")
 
 
 def _config_file() -> Path:
@@ -152,6 +151,17 @@ def _norm_str(x: object) -> str:
     return str(x).strip().lower()
 
 
+def _expand_path(value: str) -> Path:
+    return Path(os.path.expandvars(value)).expanduser()
+
+
+def _default_out_dir() -> str:
+    try:
+        return str(Path(Defaults.out_dir).resolve())
+    except Exception:
+        return str(Path(Defaults.out_dir))
+
+
 def _normalize_out_dir(raw: object, fallback: str) -> str:
     try:
         value = str(raw).strip()
@@ -160,6 +170,6 @@ def _normalize_out_dir(raw: object, fallback: str) -> str:
     if not value:
         return fallback
     try:
-        return str(Path(value).expanduser().resolve())
+        return str(_expand_path(value).resolve())
     except Exception:
         return fallback

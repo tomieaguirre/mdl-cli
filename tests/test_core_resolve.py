@@ -8,7 +8,8 @@ import mdl.core.resolve as resolve
 
 
 def test_resolve_safe_preset_sets_internal_throttling(monkeypatch, make_options, make_app_config) -> None:
-    cfg = make_app_config(preset="safe", cookies="none", out_dir="/tmp/safe-out")
+    out_dir = str((Path.cwd() / "safe-out").resolve())
+    cfg = make_app_config(preset="safe", cookies="none", out_dir=out_dir)
     monkeypatch.setattr(resolve, "load_config", lambda: cfg)
 
     run = resolve.resolve_run_options(make_options(command="audio"))
@@ -17,11 +18,12 @@ def test_resolve_safe_preset_sets_internal_throttling(monkeypatch, make_options,
     assert run.limit_rate == str(resolve.Defaults.limit_rate)
     assert run.sleep_min == int(resolve.Defaults.sleep_min)
     assert run.sleep_max == int(resolve.Defaults.sleep_max)
-    assert run.out_dir == Path("/tmp/safe-out").resolve()
+    assert run.out_dir == Path(out_dir).resolve()
 
 
 def test_resolve_fast_preset_disables_internal_throttling(monkeypatch, make_options, make_app_config) -> None:
-    cfg = make_app_config(preset="fast", cookies="none", out_dir="/tmp/fast-out")
+    out_dir = str((Path.cwd() / "fast-out").resolve())
+    cfg = make_app_config(preset="fast", cookies="none", out_dir=out_dir)
     monkeypatch.setattr(resolve, "load_config", lambda: cfg)
 
     run = resolve.resolve_run_options(make_options(command="video"))
@@ -30,7 +32,7 @@ def test_resolve_fast_preset_disables_internal_throttling(monkeypatch, make_opti
     assert run.limit_rate is None
     assert run.sleep_min is None
     assert run.sleep_max is None
-    assert run.out_dir == Path("/tmp/fast-out").resolve()
+    assert run.out_dir == Path(out_dir).resolve()
 
 
 def test_resolve_unknown_preset_falls_back_to_safe(monkeypatch, make_options, make_app_config) -> None:

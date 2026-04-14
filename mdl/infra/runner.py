@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import shlex
 import subprocess
@@ -12,6 +13,8 @@ def _command_exists(name: str) -> bool:
 
 
 def printable_cmd(cmd: List[str]) -> str:
+    if os.name == "nt":
+        return subprocess.list2cmdline(cmd)
     return " ".join(shlex.quote(s) for s in cmd)
 
 

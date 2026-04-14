@@ -4,6 +4,11 @@ from dataclasses import dataclass
 from pathlib import Path
 import os
 import re
+import sys
+
+
+def _expand_path(raw: str) -> Path:
+    return Path(os.path.expandvars(raw)).expanduser()
 
 
 def _xdg_music_dir() -> Path:
@@ -24,18 +29,48 @@ def _xdg_music_dir() -> Path:
             home = str(Path.home())
             val = val.replace("$HOME", home).replace("${HOME}", home)
 
-            # Expand any remaining env vars
-            val = os.path.expandvars(val)
-
-            return Path(val).expanduser()
+            # Expand any remaining env vars and user markers.
+            return _expand_path(val)
 
     return Path.home() / "Music"
+
+
+def default_music_dir() -> Path:
+    """
+    Return the best default Music directory for the current platform.
+    Linux prefers XDG user-dirs; other platforms default to ~/Music.
+    """
+    if sys.platform.startswith("linux"):
+        return _xdg_music_dir()
+    return Path.home() / "Music"
+
+
+def default_config_dir(app_name: str = "mdl") -> Path:
+    """
+    Return an OS-appropriate config directory.
+    - Linux/Unix: $XDG_CONFIG_HOME/<app> or ~/.config/<app>
+    - macOS/iOS: ~/Library/Application Support/<app>
+    - Windows: %APPDATA%\\<app> (fallback to %LOCALAPPDATA%\\<app>)
+    """
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA") or os.environ.get("LOCALAPPDATA")
+        if base:
+            return _expand_path(base) / app_name
+        return Path.home() / "AppData" / "Roaming" / app_name
+
+    if sys.platform == "darwin" or sys.platform.startswith("ios"):
+        return Path.home() / "Library" / "Application Support" / app_name
+
+    xdg_base = os.environ.get("XDG_CONFIG_HOME")
+    if xdg_base:
+        return _expand_path(xdg_base) / app_name
+    return Path.home() / ".config" / app_name
 
 
 @dataclass(frozen=True)
 class Defaults:
     # Output
-    out_dir: Path = _xdg_music_dir() / "mdl"
+    out_dir: Path = default_music_dir() / "mdl"
 
     # Networking behavior (safe preset)
     limit_rate: str = "1M"

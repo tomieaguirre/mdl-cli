@@ -50,7 +50,7 @@ class Options:
 @dataclass(frozen=True)
 class AppConfig:
     """
-    Persistent user configuration (Linux V1).
+    Persistent user configuration.
     Values should be normalized (lowercase).
     """
     preset: str               # "safe" | "fast"

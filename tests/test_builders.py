@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from mdl.builders.yt_dlp_audio import build_audio_command
 from mdl.builders.yt_dlp_video import build_video_command
 from mdl.builders.yt_dlp_info import build_info_command
@@ -50,7 +48,7 @@ def test_audio_single_with_shared_flags_and_cover_snapshot(make_run_options) -> 
         "--continue",
         "--no-overwrites",
         "-o",
-        str(Path("/tmp/mdl") / Defaults.audio_single_tpl),
+        str(opts.out_dir / Defaults.audio_single_tpl),
         url,
     ]
 
@@ -77,7 +75,7 @@ def test_audio_playlist_uses_playlist_template_and_no_cover_flags(make_run_optio
     assert "--embed-thumbnail" not in cmd
 
     # Template playlist (default auto => flat for regular playlists)
-    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.audio_playlist_flat_tpl))
+    _assert_contains_kv(cmd, "-o", str(opts.out_dir / Defaults.audio_playlist_flat_tpl))
 
     assert cmd[-1] == url
 
@@ -88,17 +86,19 @@ def test_audio_playlist_auto_detects_album_layout_for_olak_lists(make_run_option
 
     cmd = build_audio_command(url, opts)
 
-    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.audio_playlist_tpl))
+    _assert_contains_kv(cmd, "-o", str(opts.out_dir / Defaults.audio_playlist_tpl))
 
 
 def test_audio_playlist_mode_override_can_force_flat_or_album_layout(make_run_options) -> None:
     url = "https://example.com/watch?v=abc123&list=PLxyz"
 
-    cmd_album = build_audio_command(url, make_run_options(playlist_mode="album"))
-    _assert_contains_kv(cmd_album, "-o", str(Path("/tmp/mdl") / Defaults.audio_playlist_tpl))
+    opts_album = make_run_options(playlist_mode="album")
+    cmd_album = build_audio_command(url, opts_album)
+    _assert_contains_kv(cmd_album, "-o", str(opts_album.out_dir / Defaults.audio_playlist_tpl))
 
-    cmd_flat = build_audio_command(url, make_run_options(playlist_mode="flat"))
-    _assert_contains_kv(cmd_flat, "-o", str(Path("/tmp/mdl") / Defaults.audio_playlist_flat_tpl))
+    opts_flat = make_run_options(playlist_mode="flat")
+    cmd_flat = build_audio_command(url, opts_flat)
+    _assert_contains_kv(cmd_flat, "-o", str(opts_flat.out_dir / Defaults.audio_playlist_flat_tpl))
 
 
 def test_video_single_cover_flags_present_only_when_cover_true(make_run_options) -> None:
@@ -115,7 +115,7 @@ def test_video_single_cover_flags_present_only_when_cover_true(make_run_options)
     assert "--write-thumbnail" in cmd
     assert "--embed-thumbnail" in cmd
 
-    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.video_single_tpl))
+    _assert_contains_kv(cmd, "-o", str(opts.out_dir / Defaults.video_single_tpl))
     assert cmd[-1] == url
 
 
@@ -134,7 +134,7 @@ def test_video_playlist_cover_flags_absent_when_cover_false(make_run_options) ->
     assert "--write-thumbnail" not in cmd
     assert "--embed-thumbnail" not in cmd
 
-    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.video_playlist_flat_tpl))
+    _assert_contains_kv(cmd, "-o", str(opts.out_dir / Defaults.video_playlist_flat_tpl))
     assert cmd[-1] == url
 
 
@@ -144,7 +144,7 @@ def test_video_playlist_is_always_flat_even_for_olak_and_album_mode(make_run_opt
 
     cmd = build_video_command(url, opts)
 
-    _assert_contains_kv(cmd, "-o", str(Path("/tmp/mdl") / Defaults.video_playlist_flat_tpl))
+    _assert_contains_kv(cmd, "-o", str(opts.out_dir / Defaults.video_playlist_flat_tpl))
 
 
 def test_info_command_minimal(make_run_options) -> None:

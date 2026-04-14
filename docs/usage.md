@@ -2,16 +2,37 @@
 
 ## Overview
 
-`mdl` is a thin CLI wrapper around `yt-dlp`.  
+`mdl` is a cross-platform CLI wrapper around `yt-dlp`.
+
 It provides:
 
-- A small command surface for common download workflows (`audio`, `video`, `info`, `smoke`).
-- Persistent settings for default behavior (`preset`, `cookies`, `cover`, formats).
-- Predictable `yt-dlp` command generation with optional dry-run printing.
+- A focused command surface for common workflows (`audio`, `video`, `info`, `smoke`).
+- Persistent settings (`preset`, `cookies`, `cover`, formats, output path).
+- Predictable command generation with optional dry-run printing.
 
-`mdl` does not replace `yt-dlp`; it composes and executes `yt-dlp` commands.
+`mdl` does not replace `yt-dlp`; it builds and executes `yt-dlp` commands.
 
-## Full Command Reference
+## Requirements
+
+- Python `>=3.10`
+- `yt-dlp` available in `PATH`
+- `ffmpeg` available in `PATH` (required when `cover=on`)
+
+## Installation
+
+Recommended (isolated app install):
+
+```bash
+pipx install mdl-cli
+```
+
+Alternative (standard Python environment):
+
+```bash
+pip install mdl-cli
+```
+
+## Command Reference
 
 ### Global
 
@@ -20,9 +41,9 @@ mdl --version
 mdl --help
 ```
 
-If you run `mdl` with no arguments, it prints help and exits with code `0`.
+Running `mdl` with no arguments prints help and exits with code `0`.
 
-### Download and Inspection Commands
+### Download and Inspection
 
 ```bash
 mdl audio URL [--mode auto|album|flat] [--print]
@@ -32,29 +53,16 @@ mdl smoke audio [--print]
 mdl smoke video [--print]
 ```
 
-- `URL`: target media URL (single item or playlist).
-- `--print` (`audio`, `video`, `smoke`): print final `yt-dlp` command and exit without execution.
-- `--mode` (`audio` only):
-  - `auto` (default): detect album-like playlists (`list=OLAK...`) as album layout, otherwise flat layout.
-  - `album`: force `artist-or-channel/playlist/...`.
-  - `flat`: force `playlist/...` (single folder for all entries).
+Notes:
 
-Output base directory is configured persistently with `mdl out`:
+- `URL` can be a single item or playlist URL.
+- `--print` (`audio`, `video`, `smoke`) prints the final `yt-dlp` command and exits without execution.
+- `--mode` is available only for `audio`:
+  - `auto` (default): detects album-like playlists (`list=OLAK...`) and uses album layout.
+  - `album`: forces artist/channel + playlist layout.
+  - `flat`: forces a single playlist folder.
 
-```bash
-mdl config
-mdl out
-mdl out ~/Music/mdl
-```
-
-`smoke` uses fixed test URLs:
-
-```text
-audio: https://www.youtube.com/watch?v=dWRCooFKk3c
-video: https://www.youtube.com/watch?v=jNQXAC9IVRw
-```
-
-### Settings Commands
+### Settings
 
 ```bash
 mdl config
@@ -68,38 +76,48 @@ mdl out [PATH]
 
 Behavior:
 
-- `config`: show the effective persistent config as JSON.
-- No value (`cover`, `cookies`, `preset`, `audio-format`, `video-format`, `out`): show current value.
-- Value provided (`cover`, `cookies`, `preset`, `audio-format`, `video-format`, `out`): validate, persist, and print updated value.
-- `--list` (`cover`, `cookies`, `preset`, `audio-format`, `video-format`): show allowed values.
-- `out` accepts any path and does not support `--list`.
+- `mdl config`: prints effective persisted config as JSON.
+- `mdl <setting>`: prints current value.
+- `mdl <setting> <value>`: validates, persists, and prints updated value.
+- `mdl <setting> --list`: prints allowed values (except `out`, which accepts any path).
+- `--print` is ignored for settings commands.
 
-`--print` is ignored for settings commands.
+## Configuration and Defaults
 
-## Settings Model
+### Config File Location
 
 Settings are stored in:
 
 ```text
-~/.config/mdl/config.json
+Linux: ~/.config/mdl/config.json
+macOS: ~/Library/Application Support/mdl/config.json
+Windows: %APPDATA%\mdl\config.json
 ```
 
-Override config directory with:
+Override config directory:
 
 ```bash
-MDL_CONFIG_DIR=/custom/path
+export MDL_CONFIG_DIR=/custom/path
 ```
 
-Default values:
+PowerShell:
+
+```powershell
+$env:MDL_CONFIG_DIR = "C:\\custom\\path"
+```
+
+### Default Values
 
 - `preset`: `safe`
 - `cookies`: `none`
 - `cover`: `off`
 - `audio-format`: `m4a`
 - `video-format`: `mp4`
-- `out`: `XDG_MUSIC_DIR/mdl` or `~/Music/mdl`
+- `out`:
+  - Linux: `XDG_MUSIC_DIR/mdl` or `~/Music/mdl`
+  - macOS/Windows: `~/Music/mdl`
 
-Allowed values:
+### Allowed Values
 
 - `preset`: `safe`, `fast`
 - `cookies`: `none`, `brave`, `chrome`, `chromium`, `firefox`, `edge`
@@ -107,145 +125,116 @@ Allowed values:
 - `audio-format`: `flac`, `mp3`, `opus`, `m4a`
 - `video-format`: `mp4`, `mkv`
 
-Normalization and validation:
+### Validation Rules
 
 - Values are normalized to lowercase.
-- Unknown/invalid persisted values fall back to defaults when loaded.
-- Invalid values passed on CLI fail with a clear error and allowed set.
+- Invalid persisted values fall back to defaults on load.
+- Invalid CLI values fail with a clear error and allowed set.
 - `out` is normalized to an expanded absolute path.
 
-Preset behavior:
+## Runtime Behavior
+
+### Presets
 
 - `safe`: applies `--limit-rate 1M --sleep-interval 5 --max-sleep-interval 15`
-- `fast`: no rate limit or sleep flags
+- `fast`: disables rate/sleep throttling flags
 
-## Output Behavior
+### Output and Exit Codes
 
-`mdl` always emits the exact command it runs:
+`mdl` always prints the executed command:
 
 ```text
 [mdl] exec: yt-dlp ...
 ```
 
-Execution behavior:
+Execution model:
 
-- `audio`, `video`, `smoke`: stream `yt-dlp` stdout/stderr directly.
-- `info`: runs `yt-dlp -F ...` (plus optional shared flags).
-- Exit code is propagated from the `yt-dlp` subprocess.
-- `Ctrl+C` returns exit code `130`.
+- `audio`, `video`, `smoke`: stream subprocess output.
+- `info`: executes `yt-dlp -F URL` (plus shared flags if configured).
+- Exit code is propagated from `yt-dlp`.
+- `Ctrl+C` returns `130`.
+- Missing dependencies return `127`.
 
-`--print` behavior (`audio`, `video`, `smoke` only):
+### `--print` Mode
+
+For `audio`, `video`, and `smoke`:
 
 - Prints the fully quoted final command.
-- Does not run subprocesses.
+- Does not execute subprocesses.
 - Exits `0`.
 
-Default robustness flags for downloads:
+### Download Robustness Flags
+
+Downloads include:
 
 - `--ignore-errors`
 - `--continue`
 - `--no-overwrites`
 
-Output templates:
+## Output Templates
 
 - Audio single: `%(artists.0|artist|uploader)s/%(title)s.%(ext)s`
-- Audio playlist (album layout): `%(artists.0|artist|uploader)s/%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s`
-- Audio playlist (flat layout): `%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s`
+- Audio playlist (album): `%(artists.0|artist|uploader)s/%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s`
+- Audio playlist (flat): `%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s`
 - Video single: `%(uploader|channel)s/%(title)s.%(ext)s`
-- Video playlist: `%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s` (always flat)
+- Video playlist: `%(playlist_title|playlist)s/%(playlist_index)02d - %(title)s.%(ext)s`
 
-For audio album layout, this prefers the first artist (`artists.0`) so collaborations stay under the primary artist folder.
-For playlist folders, `mdl` removes a leading `Album - ` prefix in `playlist_title` when present.
+Layout behavior:
 
-In `auto` mode, playlist layout detection uses the playlist id:
-- `OLAK...` => album layout
-- everything else => flat layout
-For video playlists, `mdl` always uses flat layout.
+- `audio --mode auto`: `OLAK...` playlists use album layout; others use flat layout.
+- `video` playlists always use flat layout.
 
-## Thumbnail/Cover Behavior
+## Cover / Thumbnail Behavior
 
-`cover` controls thumbnail embedding strategy:
-
-- `cover off` (default): no thumbnail flags are added.
+- `cover off` (default): no thumbnail flags.
 - `cover on`:
-  - Audio command adds `--embed-thumbnail`.
-  - Video command adds `--write-thumbnail --embed-thumbnail`.
+  - Audio: `--embed-thumbnail`
+  - Video: `--write-thumbnail --embed-thumbnail`
 
-Command-level behavior:
+Command-level defaults:
 
-- `mdl audio ...` uses `-f bestaudio/best -x --audio-format <audio-format>`.
-- `mdl video ...` uses `-f bv*+ba/b --remux-video <video-format>`.
-
-Notes:
-
-- Thumbnail embedding is best-effort and depends on `yt-dlp` + media/container support.
-- Even with `cover off`, some extract/remux flows may still require `ffmpeg` via `yt-dlp`.
-
-## Dependency Model
-
-Python/runtime:
-
-- Python `>=3.10`
-- `mdl` package itself has no required third-party runtime Python dependencies.
-
-External executables:
-
-- `yt-dlp` is required for all non-settings commands.
-- `ffmpeg` is hard-checked by `mdl` when `cover=on` for audio/video/smoke.
-
-Dependency checks run before execution:
-
-- Missing dependency returns exit code `127`.
-- `mdl` still prints the command it would have executed.
+- `mdl audio ...`: `-f bestaudio/best -x --audio-format <audio-format>`
+- `mdl video ...`: `-f bv*+ba/b --remux-video <video-format>`
 
 ## Troubleshooting
 
 ### `yt-dlp not found in PATH`
 
-Install `yt-dlp` and verify it is available in `PATH`:
+Install `yt-dlp` and verify:
 
 ```bash
-pipx install yt-dlp
-which yt-dlp
+yt-dlp --version
 ```
 
 ### `ffmpeg not found in PATH`
 
-Install `ffmpeg` (required by `mdl` when `cover=on`):
+Install `ffmpeg` with your platform package manager and verify:
 
 ```bash
-sudo apt install ffmpeg
-which ffmpeg
+ffmpeg -version
 ```
 
 ### `invalid value '...'`
 
-The setting value is outside the allowed set. Check valid values:
+The setting is outside the allowed set:
 
 ```bash
 mdl <setting> --list
 ```
 
-### Files appear in an unexpected directory
+### Unexpected output folder
 
-Check effective output base:
+Check current output path and update if needed:
 
-- Current setting: `mdl out`
-- Set a new base: `mdl out /your/path`
+```bash
+mdl out
+mdl out ./downloads
+```
 
-Also verify whether URL matched playlist mode (`list=`), which changes path template.
+### Settings changes not reflected
 
-### Changes to settings are not taking effect
-
-Inspect current settings and config path:
+Inspect effective config:
 
 ```bash
 mdl config
-mdl preset
-mdl cookies
-mdl cover
-mdl audio-format
-mdl video-format
-mdl out
-cat ~/.config/mdl/config.json
 ```
