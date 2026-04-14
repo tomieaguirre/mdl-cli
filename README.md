@@ -4,170 +4,46 @@
 
 # mdl-cli
 
-`mdl` is a safe-by-default command-line wrapper around `yt-dlp`.
-
-It builds predictable `yt-dlp` commands with practical defaults and a simplified interface.
-
----
-
-## Overview
-
-`mdl` does not replace `yt-dlp`.  
-It acts as a wrapper that:
-
-- Applies safe defaults (rate limits, retries, sleep intervals)
-- Provides persistent configuration
-- Simplifies common audio/video workflows
-
-Supported platforms: Linux, macOS and Windows. iOS is supported in Python app environments (without `pipx`).
-
----
+`mdl` is a cross-platform CLI wrapper around `yt-dlp` with safer defaults and a simpler command surface.
 
 ## Requirements
 
-The following tools must be installed and available in your system `PATH`:
+- Python `>=3.10`
+- `ffmpeg` available in `PATH`
 
-- Python >= 3.10
-- `yt-dlp`
-- `ffmpeg`
+`mdl` executes `yt-dlp` under the hood. Ensure `yt-dlp` is installed and available in `PATH`.
 
-To verify they are available:
+## Installation
+
+Recommended (isolated app install):
 
 ```bash
-yt-dlp --version
-ffmpeg -version
+pipx install mdl-cli
 ```
 
-If these commands work, they are correctly installed.
-
-## Install Dependencies
-
-### Install ffmpeg (Ubuntu / Debian)
+Alternative (standard Python environment):
 
 ```bash
-sudo apt update
-sudo apt install -y ffmpeg
+pip install mdl-cli
 ```
 
-### Install yt-dlp (recommended via pipx on Linux/macOS/Windows)
+For OS-specific setup (Python, `ffmpeg`, `yt-dlp`, and verification), see the [Installation Guide](docs/installation.md).
+
+## Basic Usage
 
 ```bash
-pipx install yt-dlp
-```
-
-Note: `pipx` is generally available on Linux/macOS/Windows. On iOS, use a Python app/environment that supports `pip`.
-
-Verify:
-
-```bash
-yt-dlp --version
-```
-
-## Install mdl
-
-### Option 1: Install from local clone (development)
-
-Clone the repository:
-
-```bash
-git clone https://github.com/tomieaguirre/mdl-cli.git
-cd mdl-cli
-```
-
-Install using `pipx`:
-
-```bash
-pipx install .
-```
-
-This installs the current project using the local `pyproject.toml`.
-
-### Option 2: Install directly from GitHub
-
-```bash
-pipx install git+https://github.com/tomieaguirre/mdl-cli.git
-```
-
-## Optional: Improve Thumbnail Embedding
-
-If you enable:
-
-```bash
-mdl cover on
-```
-
-You may improve metadata handling by installing `mutagen` into the `yt-dlp` pipx environment:
-
-```bash
-pipx inject yt-dlp mutagen
-```
-
-## Quickstart
-
-```bash
-mdl --help
-mdl config
-mdl out
-mdl out ./downloads
-mdl audio "URL" --print
 mdl audio "URL"
-mdl audio "PLAYLIST_URL" --mode flat
 mdl video "URL"
 mdl info "URL"
+mdl --help
 ```
 
-If your URL contains `&`, always quote it:
-
-```bash
-mdl audio "https://music.youtube.com/watch?v=ID&si=SOMETHING"
-```
-
-## Settings
-
-Show current value:
-
-```bash
-mdl config
-mdl preset
-mdl cookies
-mdl cover
-mdl audio-format
-mdl video-format
-mdl out
-```
-
-`mdl config` prints the persistent config as JSON (same shape as your OS config file):
-
-- Linux: `~/.config/mdl/config.json`
-- macOS/iOS Python environments: `~/Library/Application Support/mdl/config.json`
-- Windows: `%APPDATA%\\mdl\\config.json`
-
-Set a new value:
-
-```bash
-mdl preset fast
-mdl cookies brave
-mdl cover on
-mdl audio-format m4a
-mdl video-format mkv
-mdl out ./downloads
-```
-
-List allowed values:
-
-```bash
-mdl preset --list
-mdl cookies --list
-mdl cover --list
-mdl audio-format --list
-mdl video-format --list
-# out accepts any path, so it has no --list
-```
+Supported platforms: Linux, macOS, and Windows.
 
 ## Documentation
 
-Full command reference:
-
+Full command reference and advanced configuration:
+- [Installation Guide](docs/installation.md)
 - [Usage Guide](docs/usage.md)
 
 ## License

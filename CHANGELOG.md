@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-04-13
+
+### Added
+- PyPI packaging support (`pip install` / `pipx install mdl-cli`)
+- Cross-platform CI (Linux, macOS, Windows)
+- Development dependencies (`.[dev]` extras)
+
 ## [0.2.0] - 2026-02-17
 
 ### Added
