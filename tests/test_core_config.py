@@ -38,3 +38,30 @@ def test_defaults_audio_templates_use_primary_artist_first() -> None:
 def test_defaults_flat_playlist_templates_group_under_playlist_folder() -> None:
     assert core_config.Defaults.audio_playlist_flat_tpl.startswith("%(playlist_title|playlist)s/")
     assert core_config.Defaults.video_playlist_flat_tpl.startswith("%(playlist_title|playlist)s/")
+
+
+def test_default_config_dir_uses_xdg_on_linux(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(core_config.sys, "platform", "linux")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+
+    result = core_config.default_config_dir("mdl")
+
+    assert result == tmp_path / "mdl"
+
+
+def test_default_config_dir_uses_library_on_macos(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(core_config.sys, "platform", "darwin")
+    monkeypatch.setattr(core_config.Path, "home", staticmethod(lambda: tmp_path))
+
+    result = core_config.default_config_dir("mdl")
+
+    assert result == tmp_path / "Library" / "Application Support" / "mdl"
+
+
+def test_default_config_dir_uses_appdata_on_windows(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(core_config.sys, "platform", "win32")
+    monkeypatch.setenv("APPDATA", str(tmp_path))
+
+    result = core_config.default_config_dir("mdl")
+
+    assert result == tmp_path / "mdl"

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from mdl.core.config import Defaults
@@ -18,11 +19,12 @@ def resolve_run_options(opts: Options) -> RunOptions:
     cfg = load_config()
 
     out_raw = str(getattr(cfg, "out_dir", "")).strip()
-    base_out = Path(out_raw if out_raw else Defaults.out_dir).expanduser()
+    out_value = out_raw if out_raw else str(Defaults.out_dir)
+    base_out = Path(os.path.expandvars(out_value)).expanduser()
     try:
         out_dir = base_out.resolve()
     except Exception:
-        out_dir = Path(Defaults.out_dir).expanduser().resolve()
+        out_dir = Path(str(Defaults.out_dir)).expanduser().resolve()
 
     preset = str(cfg.preset).strip().lower()
 

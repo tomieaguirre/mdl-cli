@@ -8,6 +8,10 @@ import pytest
 from mdl.core.options import AppConfig, Options, RunOptions
 
 
+def _default_test_out_dir() -> str:
+    return str((Path.cwd() / "mdl-test-out").resolve())
+
+
 @pytest.fixture
 def make_options() -> Callable[..., Options]:
     def _make(
@@ -37,7 +41,7 @@ def make_options() -> Callable[..., Options]:
 def make_run_options() -> Callable[..., RunOptions]:
     def _make(
         *,
-        out_dir: str | Path = "/tmp/mdl",
+        out_dir: str | Path = _default_test_out_dir(),
         preset: str = "safe",
         cookies_from: str | None = None,
         cover: bool = False,
@@ -73,7 +77,7 @@ def make_app_config() -> Callable[..., AppConfig]:
         cover: bool = False,
         audio_format: str = "m4a",
         video_format: str = "mp4",
-        out_dir: str = "/tmp/mdl",
+        out_dir: str = _default_test_out_dir(),
     ) -> AppConfig:
         return AppConfig(
             preset=preset,

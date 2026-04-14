@@ -19,6 +19,8 @@ It acts as a wrapper that:
 - Provides persistent configuration
 - Simplifies common audio/video workflows
 
+Supported platforms: Linux, macOS and Windows. iOS is supported in Python app environments (without `pipx`).
+
 ---
 
 ## Requirements
@@ -47,11 +49,13 @@ sudo apt update
 sudo apt install -y ffmpeg
 ```
 
-### Install yt-dlp (recommended via pipx)
+### Install yt-dlp (recommended via pipx on Linux/macOS/Windows)
 
 ```bash
 pipx install yt-dlp
 ```
+
+Note: `pipx` is generally available on Linux/macOS/Windows. On iOS, use a Python app/environment that supports `pip`.
 
 Verify:
 
@@ -104,7 +108,7 @@ pipx inject yt-dlp mutagen
 mdl --help
 mdl config
 mdl out
-mdl out ~/Music/mdl
+mdl out ./downloads
 mdl audio "URL" --print
 mdl audio "URL"
 mdl audio "PLAYLIST_URL" --mode flat
@@ -132,7 +136,11 @@ mdl video-format
 mdl out
 ```
 
-`mdl config` prints the persistent config as JSON (same shape as `~/.config/mdl/config.json`).
+`mdl config` prints the persistent config as JSON (same shape as your OS config file):
+
+- Linux: `~/.config/mdl/config.json`
+- macOS/iOS Python environments: `~/Library/Application Support/mdl/config.json`
+- Windows: `%APPDATA%\\mdl\\config.json`
 
 Set a new value:
 
@@ -142,7 +150,7 @@ mdl cookies brave
 mdl cover on
 mdl audio-format m4a
 mdl video-format mkv
-mdl out ~/Music/mdl
+mdl out ./downloads
 ```
 
 List allowed values:

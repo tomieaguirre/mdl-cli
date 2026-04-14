@@ -76,13 +76,14 @@ def test_load_config_falls_back_to_defaults_for_invalid_allowed_values(config_di
 
 
 def test_save_config_persists_json_file(config_dir: Path, make_app_config) -> None:
+    out_dir = str((Path.cwd() / "custom-out").resolve())
     cfg = make_app_config(
         preset="fast",
         cookies="chrome",
         cover=True,
         audio_format="flac",
         video_format="mkv",
-        out_dir="/tmp/custom-out",
+        out_dir=out_dir,
     )
 
     config_store.save_config(cfg)
@@ -94,7 +95,7 @@ def test_save_config_persists_json_file(config_dir: Path, make_app_config) -> No
     assert data["cover"] is True
     assert data["audio_format"] == "flac"
     assert data["video_format"] == "mkv"
-    assert data["out_dir"] == "/tmp/custom-out"
+    assert data["out_dir"] == out_dir
 
 
 def test_list_allowed_values_for_known_setting() -> None:
@@ -112,13 +113,14 @@ def test_list_allowed_values_raises_for_unknown_setting() -> None:
 
 
 def test_describe_config_value_handles_all_supported_settings(make_app_config) -> None:
+    out_dir = str((Path.cwd() / "out").resolve())
     cfg = make_app_config(
         preset="fast",
         cookies="firefox",
         cover=True,
         audio_format="opus",
         video_format="mkv",
-        out_dir="/tmp/out",
+        out_dir=out_dir,
     )
 
     assert config_store.describe_config_value(cfg, "cover") == "on"
@@ -126,7 +128,7 @@ def test_describe_config_value_handles_all_supported_settings(make_app_config) -
     assert config_store.describe_config_value(cfg, "preset") == "fast"
     assert config_store.describe_config_value(cfg, "audio-format") == "opus"
     assert config_store.describe_config_value(cfg, "video-format") == "mkv"
-    assert config_store.describe_config_value(cfg, "out") == "/tmp/out"
+    assert config_store.describe_config_value(cfg, "out") == out_dir
 
 
 @pytest.mark.parametrize(
@@ -155,11 +157,29 @@ def test_set_config_value_updates_each_supported_setting(
 
 
 def test_set_config_value_updates_out_with_resolved_path(make_app_config) -> None:
-    cfg = make_app_config(out_dir="/tmp/original")
+    cfg = make_app_config(out_dir=str((Path.cwd() / "original").resolve()))
 
     updated = config_store.set_config_value(cfg, "out", "./new-out")
 
     assert updated.out_dir == str(Path("./new-out").resolve())
+
+
+def test_config_dir_uses_env_override_with_var_expansion(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("MDL_CUSTOM_ROOT", str(tmp_path))
+    monkeypatch.setenv("MDL_CONFIG_DIR", "$MDL_CUSTOM_ROOT")
+
+    assert config_store._config_dir() == tmp_path
+
+
+def test_config_dir_falls_back_to_platform_default_when_env_missing(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.delenv("MDL_CONFIG_DIR", raising=False)
+    expected = tmp_path / "cfg"
+    monkeypatch.setattr(config_store, "default_config_dir", lambda _app_name: expected)
+
+    assert config_store._config_dir() == expected
 
 
 def test_set_config_value_out_rejects_empty_path(make_app_config) -> None:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from types import SimpleNamespace
 
 import pytest
@@ -9,7 +10,10 @@ from mdl.infra import runner
 
 def test_printable_cmd_quotes_arguments_with_spaces() -> None:
     rendered = runner.printable_cmd(["yt-dlp", "with space"])
-    assert rendered == "yt-dlp 'with space'"
+    if os.name == "nt":
+        assert rendered == 'yt-dlp "with space"'
+    else:
+        assert rendered == "yt-dlp 'with space'"
 
 
 def test_check_dependencies_returns_127_when_yt_dlp_is_missing(monkeypatch, capsys) -> None:

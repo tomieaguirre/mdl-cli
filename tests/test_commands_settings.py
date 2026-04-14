@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -29,13 +30,14 @@ def test_handle_setting_prints_current_value_when_value_not_provided(monkeypatch
 
 
 def test_handle_setting_config_prints_effective_config_as_json(monkeypatch, capsys, make_app_config) -> None:
+    out_dir = str((Path.cwd() / "out").resolve())
     cfg = make_app_config(
         preset="fast",
         cookies="chrome",
         cover=True,
         audio_format="opus",
         video_format="mkv",
-        out_dir="/tmp/out",
+        out_dir=out_dir,
     )
     monkeypatch.setattr(settings, "load_config", lambda: cfg)
 
@@ -50,7 +52,7 @@ def test_handle_setting_config_prints_effective_config_as_json(monkeypatch, caps
         "cover": True,
         "audio_format": "opus",
         "video_format": "mkv",
-        "out_dir": "/tmp/out",
+        "out_dir": out_dir,
     }
 
 

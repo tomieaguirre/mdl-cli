@@ -44,7 +44,7 @@ Output base directory is configured persistently with `mdl out`:
 ```bash
 mdl config
 mdl out
-mdl out ~/Music/mdl
+mdl out ./downloads
 ```
 
 `smoke` uses fixed test URLs:
@@ -81,13 +81,21 @@ Behavior:
 Settings are stored in:
 
 ```text
-~/.config/mdl/config.json
+Linux: ~/.config/mdl/config.json
+macOS/iOS Python environments: ~/Library/Application Support/mdl/config.json
+Windows: %APPDATA%\mdl\config.json
 ```
 
 Override config directory with:
 
 ```bash
-MDL_CONFIG_DIR=/custom/path
+export MDL_CONFIG_DIR=/custom/path
+```
+
+PowerShell:
+
+```powershell
+$env:MDL_CONFIG_DIR = "C:\\custom\\path"
 ```
 
 Default values:
@@ -97,7 +105,7 @@ Default values:
 - `cover`: `off`
 - `audio-format`: `m4a`
 - `video-format`: `mp4`
-- `out`: `XDG_MUSIC_DIR/mdl` or `~/Music/mdl`
+- `out`: Linux -> `XDG_MUSIC_DIR/mdl` or `~/Music/mdl`; other platforms -> `~/Music/mdl`
 
 Allowed values:
 
@@ -206,7 +214,7 @@ Install `yt-dlp` and verify it is available in `PATH`:
 
 ```bash
 pipx install yt-dlp
-which yt-dlp
+yt-dlp --version
 ```
 
 ### `ffmpeg not found in PATH`
@@ -215,7 +223,7 @@ Install `ffmpeg` (required by `mdl` when `cover=on`):
 
 ```bash
 sudo apt install ffmpeg
-which ffmpeg
+ffmpeg -version
 ```
 
 ### `invalid value '...'`
@@ -247,5 +255,12 @@ mdl cover
 mdl audio-format
 mdl video-format
 mdl out
-cat ~/.config/mdl/config.json
+```
+
+Then inspect your platform config file:
+
+```text
+Linux: ~/.config/mdl/config.json
+macOS/iOS Python environments: ~/Library/Application Support/mdl/config.json
+Windows: %APPDATA%\mdl\config.json
 ```
